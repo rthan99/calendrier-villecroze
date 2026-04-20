@@ -1,0 +1,7 @@
+{
+  "name": "villecroze",
+  "private": true,
+  "dependencies": {
+    "@vercel/kv": "latest"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "documentTitle": "Calendrier Villecroze — Qui Vient ?",
+  "hero": {
+    "title": "Calendrier Villecroze",
+    "tagline": "Qui Vient ?"
+  },
+  "familyStep": {
+    "srHeading": "Choisir une famille ou l’invité"
+  },
+  "gateIntro": {
+    "line1": "Bienvenue, voila le site pour voir le calendrier pour la maison de Villecroze! Vous pouvez voir le calendrier ou vous connecter et ajouter vos dates.",
+    "line2": "En selectionnant une famille vous pourrez y trouver votre profil afin d'enregistrer les dates."
+  },
+  "guestTile": {
+    "title": "Accès invité",
+    "meta": ""
+  },
+  "calendarBrowseButton": "Accéder au calendrier"
+}

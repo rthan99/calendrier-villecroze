@@ -1,0 +1,34 @@
+[
+  {
+    "id": "fam-hetreau-ronget",
+    "name": "Ronget",
+    "members": [
+      { "id": "hro-thierry", "name": "Thierry", "initials": "TH" },
+      { "id": "hro-quentin", "name": "Quentin", "initials": "QU" },
+      { "id": "hro-mathilde", "name": "Mathilde", "initials": "MH" },
+      { "id": "hro-baptiste", "name": "Baptiste", "initials": "BA" },
+      { "id": "hro-pauline", "name": "Pauline", "initials": "PA" },
+      { "id": "hro-helene", "name": "Hélène", "initials": "HÉ" }
+    ]
+  },
+  {
+    "id": "fam-hetreau-muller",
+    "name": "Muller",
+    "members": [
+      { "id": "hmu-gilles", "name": "Gilles", "initials": "GI" },
+      { "id": "hmu-ute", "name": "Ute", "initials": "UT" },
+      { "id": "hmu-carla", "name": "Carla", "initials": "CA" },
+      { "id": "hmu-kim", "name": "Kim", "initials": "KI" }
+    ]
+  },
+  {
+    "id": "fam-hetreau-pottier",
+    "name": "Pottier",
+    "members": [
+      { "id": "hpo-christophe", "name": "Christophe", "initials": "CH" },
+      { "id": "hpo-aline", "name": "Aline", "initials": "AL" },
+      { "id": "hpo-thomas", "name": "Thomas", "initials": "TH" },
+      { "id": "hpo-nathan", "name": "Nathan", "initials": "NA" }
+    ]
+  }
+]

@@ -1,0 +1,78 @@
+{
+  "defaultCalHint": "Chaque profil peut s’ajouter ou se retirer du même jour. Sous la date, un disque coloré par personne inscrite ; le nombre dans le cercle foncé compte tout le monde (invités inclus). Survolez un jour pour le détail.",
+  "guestCalHint": "Vue invité : seuls les jours réservés ressortent. Aucun nom ni détail sur qui a réservé. Lecture seule.",
+  "guestCalContext": "Vue invité : seuls les jours déjà réservés sont mis en évidence. Aucun nom ni famille n’est affiché.",
+  "browseCalHint": "Consultation du calendrier : vous voyez les inscriptions avec noms et couleurs. Aucun clic ne modifie les dates.",
+  "browseCalContext": "Mode lecture seule : survolez un jour pour le détail. Pour réserver, choisissez une famille puis vos profils.",
+  "calHeading": "Disponibilités",
+  "switchQuitGuest": "Quitter la vue invité",
+  "switchQuitBrowse": "Quitter la consultation",
+  "switchChangeProfiles": "Changer de profiles",
+  "sessionGuestViewLabel": "Vue invité · anonyme",
+  "sessionBrowseViewLabel": "Consultation du calendrier · lecture seule",
+  "sessionJoinWord": " et ",
+  "sessionNamesThreeTemplate": "{{a}}, {{b}} et {{n}} autre{{suffix}}",
+  "sessionOthersPluralSuffix": "s",
+  "sessionNameSeparator": " · ",
+  "calContextMulti": "Profil actif : {{activeName}}.{{invSuffix}} Survolez un jour pour le détail.",
+  "calContextSingle": "Clic sur un jour pour valider ton entrée. Survolez un jour pour la liste complète.",
+  "invSuffixTemplate": " Commun pour la sélection : +{{eg}} par clic.",
+  "bookerChipsAriaLabel": "Profil actif",
+  "legend": {
+    "free": "Libre",
+    "mine": "Votre sélection",
+    "other": "Autres",
+    "mixed": "Mixte"
+  },
+  "weekDays": ["lun", "mar", "mer", "jeu", "ven", "sam", "dim"],
+  "monthLabels": {
+    "5": "mai",
+    "6": "juin",
+    "7": "juillet",
+    "8": "août",
+    "9": "sept."
+  },
+  "fallbackMemberName": "Quelqu’un",
+  "dayTips": {
+    "guestEmpty": {
+      "headline": "Vue invité",
+      "bodyPlain": "Ce jour est libre. Les jours sans réservation sont à peine visibles."
+    },
+    "guestBooked": {
+      "headline": "Jour réservé",
+      "bodyPlain": "Du monde est inscrit ce jour-là. En vue invité, les noms ne sont pas affichés."
+    },
+    "browseEmpty": {
+      "headline": "Jour libre",
+      "bodyPlain": "Consultation seule : vous ne pouvez pas ajouter ni retirer d’inscription depuis cet accès."
+    },
+    "browseHasEntries": {
+      "headline": "Prévus pour ce jour",
+      "footHtml": "<p class=\"day-hover-foot\">Consultation seule — impossible de modifier les inscriptions depuis ce mode.</p>",
+      "footPlain": "Consultation seule — impossible de modifier les inscriptions depuis ce mode."
+    },
+    "signedInEmptyWithActive": {
+      "headline": "Inscriptions par clic",
+      "bodyHtml": "<p class=\"day-hover-p\">Personne pour l’instant.</p><p class=\"day-hover-p\">Un clic sur le jour inscrit ou retire {{activeHtml}}{{plusGuestsHtml}} (réglage à l’étape profils).</p>",
+      "bodyPlain": "Personne pour l’instant. Un clic inscrit ou retire {{activePlain}}{{plusGuestsPlain}}."
+    },
+    "signedInEmptyNoActive": {
+      "headline": "Inscriptions par clic",
+      "bodyPlain": "Personne pour l’instant. Choisissez un profil actif (barre ci-dessus si besoin), puis cliquez sur le jour."
+    },
+    "signedInHasEntriesWithActive": {
+      "headline": "Il y aura,",
+      "footHtml": "<p class=\"day-hover-foot\">Profil actif : {{activeHtml}} — clic : ajoute ou retire ce jour.</p>",
+      "footPlain": "Profil actif : {{activePlain}} — clic : ajoute ou retire ce jour."
+    },
+    "signedInHasEntriesNoActive": {
+      "headline": "Prévus pour ce jour",
+      "footHtml": "<p class=\"day-hover-foot\">Utilisez la barre « profil actif » : le clic sur le jour ajoute ou retire ce profil.</p>",
+      "footPlain": "Utilisez la barre « profil actif » : le clic sur le jour ajoute ou retire ce profil."
+    }
+  },
+  "dayAriaGuestReserved": "Jour réservé. En vue invité, les personnes qui ont cliqué pour réserver ne sont pas indiquées.",
+  "dayAriaGuestFree": "Jour libre, affichage discret en vue invité.",
+  "dayNativeGuestReserved": "Réservé — vue invité : qui a réservé n’est pas affiché",
+  "dayNativeListPrefix": "Inscrit·e·s : "
+}

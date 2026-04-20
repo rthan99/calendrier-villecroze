@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calendrier Villecroze</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="app" class="app">
+      <header class="app-hero">
+        <h1 class="app-hero-title" id="heroTitle">Calendrier Villecroze</h1>
+        <p class="app-hero-tagline" id="heroTagline">Qui Vient ?</p>
+      </header>
+
+      <main class="stage">
+        <section class="panel panel-gate" id="stepFamily" aria-labelledby="familyHeading">
+          <div class="gate-card">
+            <h2 id="familyHeading" class="sr-only">
+              Choisir une famille ou l’invité
+            </h2>
+            <div class="gate-card-intro" id="familyGateIntro">
+              <p class="gate-card-intro-line" id="familyGateIntroLine1"></p>
+              <p class="gate-card-intro-line" id="familyGateIntroLine2"></p>
+            </div>
+            <div class="family-landing" id="familyGrid"></div>
+          </div>
+        </section>
+
+        <section class="panel panel-gate" id="stepProfile" hidden aria-labelledby="profileHeading">
+          <div class="gate-card gate-card--profiles">
+            <div class="profiles-toolbar">
+              <button type="button" class="link-back link-back--profiles" id="backToFamilies">
+                ← Familles
+              </button>
+            </div>
+            <header class="profile-step-header" id="profileStepHeader">
+              <h2 id="profileHeading" class="profile-step-title">
+                Avec qui venez-vous à Villecroze ?
+              </h2>
+              <p id="profileStepLead" class="profile-step-lead">
+                Sélectionnez les personnes avec qui vous venez et rajoutez des +1 en bas si vous avez des
+                invités.
+              </p>
+            </header>
+            <div class="profile-family-block">
+              <p class="profile-family-caption" id="profileFamilyLabel"></p>
+              <button type="button" class="btn-select-whole-family" id="selectWholeFamilyBtn">
+                Sélectionner toute la famille
+              </button>
+            </div>
+            <div class="member-picker" id="profileGrid"></div>
+            <div class="profile-invite-row" id="profileInviteRow">
+              <span class="profile-invite-label" id="profileInviteLabel"
+                >Invités (avec les profils surlignés)</span
+              >
+              <div class="profile-invite-controls">
+                <button type="button" class="guest-btn" id="guestGlobalMinus" aria-label="Moins d’invités">
+                  −
+                </button>
+                <span class="guest-count-value" id="guestGlobalCount">0</span>
+                <button type="button" class="guest-btn" id="guestGlobalPlus" aria-label="Plus d’invités">
+                  +
+                </button>
+              </div>
+            </div>
+            <p class="profile-footnote" id="profileFootnote">
+              Un seul nombre d’invités pour tout le groupe sélectionné ; il s’applique à chaque profil au
+              calendrier.
+            </p>
+            <button type="button" class="btn btn-primary" id="profileContinueBtn" disabled>
+              Ouvrir le calendrier
+            </button>
+          </div>
+        </section>
+
+        <section class="panel panel-calendar" id="stepCalendar" hidden aria-labelledby="calHeading">
+          <div class="cal-session-bar">
+            <div class="session session--calendar" id="sessionSlot" hidden>
+              <div class="session-text">
+                <span class="session-name" id="sessionName"></span>
+              </div>
+              <button type="button" class="btn btn-ghost" id="switchProfileBtn">
+                Changer de profils
+              </button>
+            </div>
+          </div>
+          <div class="cal-toolbar">
+            <div>
+              <h2 id="calHeading" class="panel-title panel-title-inline">Disponibilités</h2>
+              <p class="panel-lead panel-lead-tight" id="calContext"></p>
+            </div>
+            <div class="legend" id="calLegend">
+              <span class="legend-item" data-legend="free"
+                ><span class="swatch free"></span><span class="legend-text"></span
+              ></span>
+              <span class="legend-item" data-legend="mine"
+                ><span class="swatch mine"></span><span class="legend-text"></span
+              ></span>
+              <span class="legend-item" data-legend="other"
+                ><span class="swatch other"></span><span class="legend-text"></span
+              ></span>
+              <span class="legend-item" data-legend="mixed"
+                ><span class="swatch mixed"></span><span class="legend-text"></span
+              ></span>
+            </div>
+          </div>
+          <p class="hint" id="calHint">
+            Chaque profil peut s’ajouter ou se retirer du même jour. Le « +N » commun est défini une fois pour toute la sélection (écran profils). Sous la date, un disque coloré par personne inscrite ; le nombre dans le cercle foncé compte tout le monde (invités inclus). Survolez un jour pour le détail.
+          </p>
+          <div class="booker-bar" id="bookerBar" hidden>
+            <div class="booker-chips" id="bookerChips" role="radiogroup" aria-label="Profil actif"></div>
+          </div>
+          <div class="months" id="monthsRoot"></div>
+        </section>
+      </main>
+    </div>
+    <div id="dayHoverTip" class="day-hover-tip" hidden role="tooltip">
+      <div class="day-hover-tip-title" id="dayHoverTipTitle"></div>
+      <div class="day-hover-tip-body" id="dayHoverTipBody"></div>
+      <div class="day-hover-tip-foot" id="dayHoverTipFoot"></div>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>
