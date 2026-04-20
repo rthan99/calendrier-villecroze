@@ -1,50 +1,31 @@
-/**
- * Vercel Serverless Function: stockage partagé des réservations.
- * Clé persistée: process.env.BOOKINGS_KV_KEY || "villecroze:bookings:v1"
- */
-const { kv } = require("@vercel/kv");
+const SUPABASE_URL = process.env.https://fivenrdkveorbfvqhwtn.supabase.co;
+const SUPABASE_KEY = process.env.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZpdmVucmRrdmVvcmJmdnFod3RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NzUyMTksImV4cCI6MjA5MjI1MTIxOX0.M1QiwszdhNAaphgswkJgtmg4ONn5fJbYLQjYzsqj2eo;
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  if (req.method === "OPTIONS") return res.status(200).end();
 
-  if (req.method === "OPTIONS") {
-    res.status(204).end();
-    return;
+  const base = `${SUPABASE_URL}/rest/v1/bookings?id=eq.main`;
+  const headers = {
+    "apikey": SUPABASE_KEY,
+    "Authorization": `Bearer ${SUPABASE_KEY}`,
+    "Content-Type": "application/json",
+  };
+
+  if (req.method === "GET") {
+    const r = await fetch(base, { headers });
+    const rows = await r.json();
+    return res.status(200).json(rows[0]?.data || {});
   }
 
-  const kvKey = process.env.BOOKINGS_KV_KEY || "villecroze:bookings:v1";
-
-  try {
-    if (req.method === "GET") {
-      const out = await kv.get(kvKey);
-      if (!out || typeof out !== "object") {
-        res.status(200).json({ version: 5, bookings: {} });
-        return;
-      }
-      res.status(200).json(out);
-      return;
-    }
-
-    if (req.method === "POST") {
-      const body = req.body && typeof req.body === "object" ? req.body : {};
-      const safe = {
-        version: 5,
-        bookings: body.bookings && typeof body.bookings === "object" ? body.bookings : {},
-      };
-
-      await kv.set(kvKey, safe);
-      res.status(200).json({ ok: true });
-      return;
-    }
-
-    res.setHeader("Allow", "GET,POST,OPTIONS");
-    res.status(405).json({ error: "Method not allowed" });
-  } catch (err) {
-    res.status(500).json({
-      error: "Internal error",
-      message: err instanceof Error ? err.message : String(err),
+  if (req.method === "POST") {
+    await fetch(base, {
+      method: "PATCH",
+      headers,
+      body: JSON.stringify({ data: req.body, updated_at: new Date() }),
     });
+    return res.status(200).json({ ok: true });
   }
-};
+}
