@@ -117,6 +117,7 @@
       ],
     },
   ];
+  const CUSTOM_INVITE_FAMILY_ID = "fam-invite-custom";
 
   const SITE_DEFAULT_PAGE_PROFILES = {
     srHeading: "Choisir les profils de la famille",
@@ -246,6 +247,44 @@
   /** Données familles (éditer surtout content/families.json). */
   let families = [];
 
+  function ensureCustomInviteFamily() {
+    const existing = families.find((f) => f.id === CUSTOM_INVITE_FAMILY_ID);
+    if (existing) return existing;
+    const inviteFamily = {
+      id: CUSTOM_INVITE_FAMILY_ID,
+      name: "Invité",
+      members: [],
+    };
+    families.push(inviteFamily);
+    return inviteFamily;
+  }
+
+  function inviteInitialsFromName(name) {
+    const parts = String(name)
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+    if (!parts.length) return "IN";
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return `${parts[0][0] || ""}${parts[1][0] || ""}`.toUpperCase();
+  }
+
+  function addInviteMember(nameRaw) {
+    const inviteFamily = ensureCustomInviteFamily();
+    const name = String(nameRaw || "").trim();
+    if (!name) return false;
+    const memberId = `inv-${Date.now().toString(36)}-${Math.random()
+      .toString(36)
+      .slice(2, 7)}`;
+    inviteFamily.members.push({
+      id: memberId,
+      name,
+      initials: inviteInitialsFromName(name),
+    });
+    profileMemberIds = [...new Set([...profileMemberIds, memberId])];
+    return true;
+  }
+
   /** Textes UI chargés depuis content/page-*.json */
   let siteText = /** @type {{ landing: any; profile: any; calendar: any } | null} */ (
     null
@@ -279,7 +318,8 @@
         profile: out[2],
         calendar: out[3],
       };
-      families = out[1];
+      families = Array.isArray(out[1]) ? out[1] : [];
+      ensureCustomInviteFamily();
     } catch (err) {
       console.warn(
         "[Villecroze] Chargement des JSON impossible (file:// ou erreur réseau) — contenu intégré utilisé.",
@@ -290,7 +330,8 @@
         profile: SITE_DEFAULT_PAGE_PROFILES,
         calendar: SITE_DEFAULT_PAGE_CALENDAR,
       };
-      families = SITE_DEFAULT_FAMILIES;
+      families = [...SITE_DEFAULT_FAMILIES];
+      ensureCustomInviteFamily();
     }
   }
 
@@ -511,6 +552,9 @@
     guestGlobalMinus: document.getElementById("guestGlobalMinus"),
     guestGlobalPlus: document.getElementById("guestGlobalPlus"),
     guestGlobalCount: document.getElementById("guestGlobalCount"),
+    profileInviteRow: document.getElementById("profileInviteRow"),
+    profileFootnote: document.getElementById("profileFootnote"),
+    profileStepLead: document.getElementById("profileStepLead"),
     dayHoverTip: document.getElementById("dayHoverTip"),
     dayHoverTipTitle: document.getElementById("dayHoverTipTitle"),
     dayHoverTipBody: document.getElementById("dayHoverTipBody"),
@@ -553,6 +597,38 @@
   let remoteWriteInFlight = false;
   let remoteSaveTimer = 0;
   let pendingRemoteBookings = null;
+
+  function ensureInviteNameEditor() {
+    let wrap = document.getElementById("inviteNameEditor");
+    if (!wrap) {
+      wrap = document.createElement("div");
+      wrap.id = "inviteNameEditor";
+      wrap.className = "invite-name-editor";
+      wrap.innerHTML =
+        '<input id="inviteNameInput" class="invite-name-editor__input" type="text" placeholder="Nom de l’invité" autocomplete="off" />' +
+        '<button id="inviteNameAddBtn" class="btn btn-ghost invite-name-editor__btn" type="button">Ajouter</button>';
+      els.profileGrid.parentNode.insertBefore(wrap, els.profileGrid);
+      const input = wrap.querySelector("#inviteNameInput");
+      const addBtn = wrap.querySelector("#inviteNameAddBtn");
+      const onAdd = () => {
+        if (selectedFamilyId !== CUSTOM_INVITE_FAMILY_ID) return;
+        if (!input) return;
+        const ok = addInviteMember(input.value);
+        if (!ok) return;
+        input.value = "";
+        const fam = families.find((f) => f.id === CUSTOM_INVITE_FAMILY_ID);
+        if (fam) renderProfiles(fam);
+      };
+      addBtn?.addEventListener("click", onAdd);
+      input?.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter") {
+          ev.preventDefault();
+          onAdd();
+        }
+      });
+    }
+    return wrap;
+  }
   let remoteLoadInFlight = null;
 
   function purgeOldCalendarKeys() {
@@ -1670,6 +1746,18 @@
       els.guestGlobalCount.textContent = String(profileExtraGuests);
     }
 
+    const inviteMode = fam.id === CUSTOM_INVITE_FAMILY_ID;
+    const inviteEditor = ensureInviteNameEditor();
+    inviteEditor.hidden = !inviteMode;
+    if (els.selectWholeFamilyBtn) els.selectWholeFamilyBtn.hidden = inviteMode;
+    if (els.profileInviteRow) els.profileInviteRow.hidden = inviteMode;
+    if (els.profileFootnote) els.profileFootnote.hidden = inviteMode;
+    if (els.profileStepLead && siteText?.profile) {
+      els.profileStepLead.textContent = inviteMode
+        ? "Ajoutez un ou plusieurs invités, puis sélectionnez-les pour ouvrir le calendrier."
+        : siteText.profile.stepLead;
+    }
+
     els.profileFamilyLabel.textContent = fam.name;
     stopMemberPhysics();
     els.profileGrid.innerHTML = "";
@@ -1720,6 +1808,7 @@
     });
     els.profileGrid.dataset.floatFamily = fam.id;
     syncProfileContinue();
+    if (inviteMode) return;
     requestAnimationFrame(() => {
       startMemberPhysics(els.profileGrid);
       requestAnimationFrame(() => startMemberPhysics(els.profileGrid));
@@ -2065,6 +2154,7 @@
       if (!selectedFamilyId) return;
       const fam = families.find((f) => f.id === selectedFamilyId);
       if (!fam) return;
+      if (fam.id === CUSTOM_INVITE_FAMILY_ID) return;
       const allIds = fam.members.map((mm) => mm.id);
       const allSelected =
         allIds.length > 0 &&
