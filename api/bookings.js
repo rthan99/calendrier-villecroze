@@ -1,7 +1,10 @@
 const SUPABASE_URL = process.env.https://fivenrdkveorbfvqhwtn.supabase.co;
 const SUPABASE_KEY = process.env.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZpdmVucmRrdmVvcmJmdnFod3RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NzUyMTksImV4cCI6MjA5MjI1MTIxOX0.M1QiwszdhNAaphgswkJgtmg4ONn5fJbYLQjYzsqj2eo;
-
 export default async function handler(req, res) {
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
+    return res.status(500).json({ error: "Missing SUPABASE_URL or SUPABASE_KEY" });
+  }
+
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
