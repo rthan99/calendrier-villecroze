@@ -269,11 +269,28 @@
     return `${parts[0][0] || ""}${parts[1][0] || ""}`.toUpperCase();
   }
 
+  function encodeInviteNameForMemberId(name) {
+    return encodeURIComponent(String(name || "").trim());
+  }
+
+  function decodeInviteNameFromMemberId(memberId) {
+    const raw = String(memberId || "");
+    if (!raw.startsWith("invite:")) return "";
+    const parts = raw.split(":");
+    if (parts.length < 3) return "";
+    try {
+      return decodeURIComponent(parts[1] || "").trim();
+    } catch (_) {
+      return "";
+    }
+  }
+
   function addInviteMember(nameRaw) {
     const inviteFamily = ensureCustomInviteFamily();
     const name = String(nameRaw || "").trim();
     if (!name) return false;
-    const memberId = `inv-${Date.now().toString(36)}-${Math.random()
+    const encName = encodeInviteNameForMemberId(name);
+    const memberId = `invite:${encName}:${Date.now().toString(36)}-${Math.random()
       .toString(36)
       .slice(2, 7)}`;
     inviteFamily.members.push({
@@ -521,6 +538,9 @@
     const m = fam?.members.find((x) => x.id === memberId);
     return (
       m?.name ??
+      (familyId === CUSTOM_INVITE_FAMILY_ID
+        ? decodeInviteNameFromMemberId(memberId)
+        : "") ??
       siteText?.calendar?.fallbackMemberName ??
       "Quelqu’un"
     );
@@ -533,6 +553,7 @@
   }
 
   const els = {
+    globalBackBtn: document.getElementById("globalBackBtn"),
     stepFamily: document.getElementById("stepFamily"),
     stepProfile: document.getElementById("stepProfile"),
     stepCalendar: document.getElementById("stepCalendar"),
@@ -597,6 +618,40 @@
   let remoteWriteInFlight = false;
   let remoteSaveTimer = 0;
   let pendingRemoteBookings = null;
+  let currentStep = "family";
+
+  function resetToFamilyStep() {
+    selectedFamilyId = null;
+    profileMemberIds = [];
+    profileExtraGuests = 0;
+    session = null;
+    activeBookerMemberId = null;
+    if (els.calHint) els.calHint.textContent = siteText.calendar.defaultCalHint;
+    if (els.calLegend) els.calLegend.hidden = false;
+    showStep("family");
+  }
+
+  function goBackOneStep() {
+    if (currentStep === "calendar") {
+      if (session && (isGuestSession() || isCalendarBrowseSession())) {
+        resetToFamilyStep();
+        return;
+      }
+      if (selectedFamilyId) {
+        const fam = families.find((f) => f.id === selectedFamilyId);
+        if (fam) {
+          renderProfiles(fam);
+          showStep("profile");
+          return;
+        }
+      }
+      resetToFamilyStep();
+      return;
+    }
+    if (currentStep === "profile") {
+      resetToFamilyStep();
+    }
+  }
 
   function ensureInviteNameEditor() {
     let wrap = document.getElementById("inviteNameEditor");
@@ -1279,6 +1334,7 @@
   }
 
   function showStep(step) {
+    currentStep = step;
     [els.stepFamily, els.stepProfile, els.stepCalendar].forEach((el) => {
       el.classList.remove("panel-enter");
     });
@@ -1297,6 +1353,9 @@
       });
     });
     const onCalendar = step === "calendar";
+    if (els.globalBackBtn) {
+      els.globalBackBtn.hidden = step === "family";
+    }
     els.sessionSlot.hidden = !onCalendar || !session;
     if (onCalendar && session) {
       if (isGuestSession() || isCalendarBrowseSession()) {
@@ -1804,6 +1863,26 @@
         syncProfileContinue();
       });
 
+      if (inviteMode) {
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.className = "member-picker__remove";
+        removeBtn.setAttribute("aria-label", `Retirer ${m.name}`);
+        removeBtn.textContent = "×";
+        removeBtn.addEventListener("click", (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          fam.members = fam.members.filter((x) => x.id !== m.id);
+          profileMemberIds = profileMemberIds.filter((id) => id !== m.id);
+          if (session && session.familyId === fam.id) {
+            session.memberIds = session.memberIds.filter((id) => id !== m.id);
+            if (!session.memberIds.length) activeBookerMemberId = null;
+          }
+          renderProfiles(fam);
+        });
+        btn.appendChild(removeBtn);
+      }
+
       els.profileGrid.appendChild(btn);
     });
     els.profileGrid.dataset.floatFamily = fam.id;
@@ -2138,16 +2217,7 @@
     showStep("calendar");
   });
 
-  els.backToFamilies.addEventListener("click", () => {
-    selectedFamilyId = null;
-    profileMemberIds = [];
-    profileExtraGuests = 0;
-    session = null;
-    activeBookerMemberId = null;
-    if (els.calHint) els.calHint.textContent = siteText.calendar.defaultCalHint;
-    if (els.calLegend) els.calLegend.hidden = false;
-    showStep("family");
-  });
+  els.backToFamilies.addEventListener("click", () => resetToFamilyStep());
 
   if (els.selectWholeFamilyBtn) {
     els.selectWholeFamilyBtn.addEventListener("click", () => {
@@ -2195,31 +2265,8 @@
     });
   }
 
-  els.switchProfileBtn.addEventListener("click", () => {
-    if (session && (isGuestSession() || isCalendarBrowseSession())) {
-      session = null;
-      activeBookerMemberId = null;
-      if (els.calHint) els.calHint.textContent = siteText.calendar.defaultCalHint;
-      if (els.calLegend) els.calLegend.hidden = false;
-      showStep("family");
-      return;
-    }
-    if (selectedFamilyId) {
-      const fam = families.find((f) => f.id === selectedFamilyId);
-      if (fam) {
-        renderProfiles(fam);
-        showStep("profile");
-        return;
-      }
-    }
-    session = null;
-    profileMemberIds = [];
-    profileExtraGuests = 0;
-    activeBookerMemberId = null;
-    if (els.calHint) els.calHint.textContent = siteText.calendar.defaultCalHint;
-    if (els.calLegend) els.calLegend.hidden = false;
-    showStep("family");
-  });
+  els.switchProfileBtn.addEventListener("click", () => goBackOneStep());
+  els.globalBackBtn?.addEventListener("click", () => goBackOneStep());
 
   function initProfileInviteControls() {
     if (profileInviteControlsBound) return;
