@@ -550,7 +550,7 @@
 
   /** @type {Record<string, DayEntry[]>} */
   let bookings = {};
-  let remoteSaveTimer = 0;
+  let remoteWriteInFlight = false;
   let remoteLoadInFlight = null;
 
   function purgeOldCalendarKeys() {
@@ -565,9 +565,16 @@
 
   /** Efface toutes les réservations et met à jour l’affichage si besoin. */
   function clearAllBookings() {
-    bookings = {};
-    saveBookings();
-    if (session) renderCalendar();
+    const next = {};
+    if (!BOOKINGS_API_URL) {
+      bookings = next;
+      saveBookings(next);
+      if (session) renderCalendar();
+      return;
+    }
+    saveBookings(next).then((ok) => {
+      if (ok && session) renderCalendar();
+    });
   }
 
   /** Réinitialisation : ouvrir `index.html?reset=calendar` une fois (l’URL est nettoyée ensuite). */
@@ -699,6 +706,14 @@
     }
   }
 
+  function clearLocalBookingsCache() {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (_) {
+      /* ignore */
+    }
+  }
+
   async function loadRemoteBookings() {
     if (!BOOKINGS_API_URL) return null;
     const res = await fetch(BOOKINGS_API_URL, {
@@ -717,40 +732,46 @@
     if (remoteLoadInFlight) return remoteLoadInFlight;
     remoteLoadInFlight = loadRemoteBookings()
       .then((remote) => {
-        if (remote && Object.keys(remote).length) {
-          bookings = remote;
-          saveLocalBookings();
-          return remote;
-        }
-        return local;
+        const next = remote && typeof remote === "object" ? remote : {};
+        bookings = next;
+        clearLocalBookingsCache();
+        return next;
       })
-      .catch(() => local)
+      .catch(() => {
+        bookings = {};
+        clearLocalBookingsCache();
+        return {};
+      })
       .finally(() => {
         remoteLoadInFlight = null;
       });
     return remoteLoadInFlight;
   }
 
-  function queueRemoteSave() {
-    if (!BOOKINGS_API_URL) return;
-    if (remoteSaveTimer) clearTimeout(remoteSaveTimer);
-    remoteSaveTimer = window.setTimeout(async () => {
-      remoteSaveTimer = 0;
-      try {
-        await fetch(BOOKINGS_API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ version: 5, bookings }),
-        });
-      } catch (_) {
-        /* ignore: localStorage reste la source de secours */
-      }
-    }, 180);
-  }
-
-  function saveBookings() {
-    saveLocalBookings();
-    queueRemoteSave();
+  async function saveBookings(nextBookings = bookings) {
+    if (!BOOKINGS_API_URL) {
+      bookings = nextBookings;
+      saveLocalBookings();
+      return true;
+    }
+    if (remoteWriteInFlight) return false;
+    remoteWriteInFlight = true;
+    try {
+      const postRes = await fetch(BOOKINGS_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ version: 5, bookings: nextBookings }),
+      });
+      if (!postRes.ok) return false;
+      const confirmed = await loadRemoteBookings();
+      bookings = confirmed && typeof confirmed === "object" ? confirmed : {};
+      clearLocalBookingsCache();
+      return true;
+    } catch (_) {
+      return false;
+    } finally {
+      remoteWriteInFlight = false;
+    }
   }
 
   function dateKey(y, m, d) {
@@ -1963,8 +1984,9 @@
     });
   }
 
-  function onDayClick(key) {
+  async function onDayClick(key) {
     if (!session || isGuestSession() || isCalendarBrowseSession()) return;
+    if (BOOKINGS_API_URL && remoteWriteInFlight) return;
     const selectedIds = [...new Set(session.memberIds.filter(Boolean))];
     if (!selectedIds.length) return;
     const guests = Math.max(0, session.extraGuests ?? 0);
@@ -1989,9 +2011,12 @@
       session.memberIds,
       guests
     );
-    setDayEntries(key, list);
-    saveBookings();
-    renderCalendar();
+    const nextBookings = normalizeBookingsObject(bookings);
+    const nextEntries = dedupeEntries(list);
+    if (nextEntries.length === 0) delete nextBookings[key];
+    else nextBookings[key] = nextEntries;
+    const ok = await saveBookings(nextBookings);
+    if (ok) renderCalendar();
   }
 
   els.profileContinueBtn.addEventListener("click", () => {
@@ -2110,6 +2135,7 @@
   }
 
   window.addEventListener("storage", (e) => {
+    if (BOOKINGS_API_URL) return;
     if (e.key === STORAGE_KEY) {
       bookings = loadLocalBookings();
       if (session) renderCalendar();
