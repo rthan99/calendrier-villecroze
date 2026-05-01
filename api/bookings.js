@@ -1,5 +1,5 @@
 const SUPABASE_URL = process.env.https://fivenrdkveorbfvqhwtn.supabase.co || "";
-const SUPABASE_KEY = process.env.sb_secret_lAmZq_ELK-gqmkIDNR-XCA_LTaD-iDP || "";
+const SUPABASE_KEY = process.env.sb_publishable_eNUrjAklGHV3fo7LgiwoNQ_gVlWk-x6 || "";
 
 function jsonHeaders() {
   return {
