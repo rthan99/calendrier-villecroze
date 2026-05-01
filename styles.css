@@ -657,6 +657,12 @@ body {
   mask-position: center;
 }
 
+.family-picker__icon-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 .family-picker__name {
   flex-shrink: 0;
   max-width: 100%;
@@ -888,6 +894,12 @@ body {
   background: #e4e4e8;
   color: #9aa8b8;
   transition: background-color 0.16s ease, color 0.16s ease;
+}
+
+.member-picker__face-img {
+  width: 78%;
+  height: 78%;
+  object-fit: contain;
 }
 
 .member-picker__btn--selected .member-picker__face {

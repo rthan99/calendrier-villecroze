@@ -527,6 +527,20 @@
     return assetUrl("icons/noun-mushrooms-4644483.svg");
   }
 
+  function invitePineconePngUrl() {
+    return assetUrl("icons/noun-pinecone-8023365.png");
+  }
+
+  function makeInvitePineconeImgEl(cls) {
+    const img = document.createElement("img");
+    img.className = cls;
+    img.src = invitePineconePngUrl();
+    img.alt = "";
+    img.setAttribute("aria-hidden", "true");
+    img.loading = "lazy";
+    return img;
+  }
+
   function memberHue(familyId, memberId) {
     const fam = families.find((f) => f.id === familyId);
     const rawIdx = fam?.members.findIndex((m) => m.id === memberId);
@@ -1477,6 +1491,9 @@
       const icon = document.createElement("span");
       icon.className = "family-picker__icon";
       icon.setAttribute("aria-hidden", "true");
+      if (fam.id === CUSTOM_INVITE_FAMILY_ID) {
+        icon.appendChild(makeInvitePineconeImgEl("family-picker__icon-img"));
+      }
 
       const name = document.createElement("span");
       name.className = "family-picker__name";
@@ -1857,7 +1874,9 @@
 
       const face = document.createElement("span");
       face.className = "member-picker__face";
-      if (m.id === "hmu-carla") {
+      if (fam.id === CUSTOM_INVITE_FAMILY_ID) {
+        face.appendChild(makeInvitePineconeImgEl("member-picker__face-img"));
+      } else if (m.id === "hmu-carla") {
         face.appendChild(
           makeCarlaMushroomIconEl(null, "member-picker__mask")
         );
