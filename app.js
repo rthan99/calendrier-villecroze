@@ -2037,14 +2037,14 @@
         els.calHint.textContent =
           Ccal.browseCalHint ??
           "Consultation du calendrier : lecture seule, sans modification des dates.";
-      if (els.calLegend) els.calLegend.hidden = false;
+      if (els.calLegend) els.calLegend.hidden = true;
       els.calContext.textContent =
         Ccal.browseCalContext ??
         "Survolez un jour pour le détail. Pour réserver, passez par une famille et vos profils.";
       if (els.bookerBar) els.bookerBar.hidden = true;
     } else {
       if (els.calHint) els.calHint.textContent = Ccal.defaultCalHint;
-      if (els.calLegend) els.calLegend.hidden = false;
+      if (els.calLegend) els.calLegend.hidden = true;
       ensureActiveBooker();
       renderBookerBar();
       const n = session.memberIds.length;
