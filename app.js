@@ -302,6 +302,30 @@
     return true;
   }
 
+  function hydrateInviteFamilyMembersFromBookings(rawBookings) {
+    const inviteFamily = ensureCustomInviteFamily();
+    const existing = new Map(
+      (inviteFamily.members || []).map((m) => [m.id, m])
+    );
+    const bookingsObj =
+      rawBookings && typeof rawBookings === "object" ? rawBookings : {};
+    for (const entries of Object.values(bookingsObj)) {
+      if (!Array.isArray(entries)) continue;
+      for (const e of entries) {
+        if (!e || e.familyId !== CUSTOM_INVITE_FAMILY_ID) continue;
+        if (typeof e.memberId !== "string" || existing.has(e.memberId)) continue;
+        const decodedName = decodeInviteNameFromMemberId(e.memberId).trim();
+        if (!decodedName) continue;
+        existing.set(e.memberId, {
+          id: e.memberId,
+          name: decodedName,
+          initials: inviteInitialsFromName(decodedName),
+        });
+      }
+    }
+    inviteFamily.members = Array.from(existing.values());
+  }
+
   /** Textes UI chargés depuis content/page-*.json */
   let siteText = /** @type {{ landing: any; profile: any; calendar: any } | null} */ (
     null
@@ -536,14 +560,13 @@
   function getMemberDisplayName(familyId, memberId) {
     const fam = families.find((f) => f.id === familyId);
     const m = fam?.members.find((x) => x.id === memberId);
-    return (
-      m?.name ??
-      (familyId === CUSTOM_INVITE_FAMILY_ID
-        ? decodeInviteNameFromMemberId(memberId)
-        : "") ??
-      siteText?.calendar?.fallbackMemberName ??
-      "Quelqu’un"
-    );
+    if (m?.name && String(m.name).trim()) return m.name;
+    if (familyId === CUSTOM_INVITE_FAMILY_ID) {
+      const decoded = decodeInviteNameFromMemberId(memberId);
+      if (decoded) return decoded;
+      return "Invité";
+    }
+    return siteText?.calendar?.fallbackMemberName ?? "Quelqu’un";
   }
 
   function coloredNameHtml(familyId, memberId) {
@@ -860,11 +883,13 @@
       .then((remote) => {
         const next = remote && typeof remote === "object" ? remote : {};
         bookings = next;
+        hydrateInviteFamilyMembersFromBookings(next);
         clearLocalBookingsCache();
         return next;
       })
       .catch(() => {
         bookings = {};
+        hydrateInviteFamilyMembersFromBookings({});
         clearLocalBookingsCache();
         return {};
       })
@@ -2289,6 +2314,7 @@
     if (BOOKINGS_API_URL) return;
     if (e.key === STORAGE_KEY) {
       bookings = loadLocalBookings();
+      hydrateInviteFamilyMembersFromBookings(bookings);
       if (session) renderCalendar();
     }
   });
@@ -2303,6 +2329,7 @@
     maybeResetCalendarFromUrl();
     initProfileInviteControls();
     bookings = await loadBookings();
+    hydrateInviteFamilyMembersFromBookings(bookings);
     renderFamilies();
     showStep("family");
     window.villecrozeResetCalendar = () => {
