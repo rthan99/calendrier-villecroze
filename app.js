@@ -1850,7 +1850,11 @@
     const inviteMode = fam.id === CUSTOM_INVITE_FAMILY_ID;
     const inviteEditor = ensureInviteNameEditor();
     inviteEditor.hidden = !inviteMode;
-    if (els.selectWholeFamilyBtn) els.selectWholeFamilyBtn.hidden = inviteMode;
+    if (els.selectWholeFamilyBtn) {
+      els.selectWholeFamilyBtn.hidden = inviteMode;
+      els.selectWholeFamilyBtn.style.display = inviteMode ? "none" : "";
+      els.selectWholeFamilyBtn.disabled = inviteMode;
+    }
     if (els.profileInviteRow) els.profileInviteRow.hidden = inviteMode;
     if (els.profileFootnote) els.profileFootnote.hidden = inviteMode;
     if (els.profileStepLead && siteText?.profile) {
