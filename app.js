@@ -551,6 +551,8 @@
   /** @type {Record<string, DayEntry[]>} */
   let bookings = {};
   let remoteWriteInFlight = false;
+  let remoteSaveTimer = 0;
+  let pendingRemoteBookings = null;
   let remoteLoadInFlight = null;
 
   function purgeOldCalendarKeys() {
@@ -566,15 +568,8 @@
   /** Efface toutes les réservations et met à jour l’affichage si besoin. */
   function clearAllBookings() {
     const next = {};
-    if (!BOOKINGS_API_URL) {
-      bookings = next;
-      saveBookings(next);
-      if (session) renderCalendar();
-      return;
-    }
-    saveBookings(next).then((ok) => {
-      if (ok && session) renderCalendar();
-    });
+    saveBookings(next);
+    if (session) renderCalendar();
   }
 
   /** Réinitialisation : ouvrir `index.html?reset=calendar` une fois (l’URL est nettoyée ensuite). */
@@ -748,30 +743,50 @@
     return remoteLoadInFlight;
   }
 
-  async function saveBookings(nextBookings = bookings) {
-    if (!BOOKINGS_API_URL) {
-      bookings = nextBookings;
-      saveLocalBookings();
-      return true;
-    }
-    if (remoteWriteInFlight) return false;
+  function queueRemoteSave(nextBookings) {
+    if (!BOOKINGS_API_URL) return;
+    pendingRemoteBookings = normalizeBookingsObject(nextBookings || bookings);
+    if (remoteSaveTimer) clearTimeout(remoteSaveTimer);
+    remoteSaveTimer = window.setTimeout(flushRemoteSave, 2500);
+  }
+
+  async function flushRemoteSave() {
+    if (!BOOKINGS_API_URL) return;
+    if (remoteWriteInFlight) return;
+    const payload = pendingRemoteBookings || normalizeBookingsObject(bookings);
+    pendingRemoteBookings = null;
+    remoteSaveTimer = 0;
     remoteWriteInFlight = true;
     try {
       const postRes = await fetch(BOOKINGS_API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ version: 5, bookings: nextBookings }),
+        body: JSON.stringify({ version: 5, bookings: payload }),
       });
-      if (!postRes.ok) return false;
-      const confirmed = await loadRemoteBookings();
-      bookings = confirmed && typeof confirmed === "object" ? confirmed : {};
-      clearLocalBookingsCache();
-      return true;
+      if (!postRes.ok) {
+        pendingRemoteBookings = payload;
+        remoteSaveTimer = window.setTimeout(flushRemoteSave, 4000);
+      }
     } catch (_) {
-      return false;
+      pendingRemoteBookings = payload;
+      remoteSaveTimer = window.setTimeout(flushRemoteSave, 4000);
     } finally {
       remoteWriteInFlight = false;
+      if (pendingRemoteBookings && !remoteSaveTimer) {
+        remoteSaveTimer = window.setTimeout(flushRemoteSave, 1200);
+      }
     }
+  }
+
+  function saveBookings(nextBookings = bookings) {
+    bookings = normalizeBookingsObject(nextBookings);
+    if (!BOOKINGS_API_URL) {
+      saveLocalBookings();
+      return true;
+    }
+    clearLocalBookingsCache();
+    queueRemoteSave(bookings);
+    return true;
   }
 
   function dateKey(y, m, d) {
@@ -1984,9 +1999,8 @@
     });
   }
 
-  async function onDayClick(key) {
+  function onDayClick(key) {
     if (!session || isGuestSession() || isCalendarBrowseSession()) return;
-    if (BOOKINGS_API_URL && remoteWriteInFlight) return;
     const selectedIds = [...new Set(session.memberIds.filter(Boolean))];
     if (!selectedIds.length) return;
     const guests = Math.max(0, session.extraGuests ?? 0);
@@ -2015,8 +2029,8 @@
     const nextEntries = dedupeEntries(list);
     if (nextEntries.length === 0) delete nextBookings[key];
     else nextBookings[key] = nextEntries;
-    const ok = await saveBookings(nextBookings);
-    if (ok) renderCalendar();
+    saveBookings(nextBookings);
+    renderCalendar();
   }
 
   els.profileContinueBtn.addEventListener("click", () => {
