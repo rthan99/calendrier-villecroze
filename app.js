@@ -1943,9 +1943,9 @@
   }
 
   function familyFullIconColor(familyId) {
-    if (familyId === "fam-hetreau-ronget") return "#5a7863";
-    if (familyId === "fam-hetreau-muller") return "#4e8d9c";
-    if (familyId === "fam-hetreau-pottier") return "#ff8383";
+    if (familyId === "fam-hetreau-ronget") return "#ef476f";
+    if (familyId === "fam-hetreau-muller") return "#118ab2";
+    if (familyId === "fam-hetreau-pottier") return "#06d6a0";
     return "hsl(175, 65%, 32%)";
   }
 
