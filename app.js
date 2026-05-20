@@ -436,28 +436,28 @@
    * (#3b4953 → #5a7863 → #90ab8b → #ebf4dd) + deux tons intermédiaires pour 6 profils.
    */
   const RONGET_PALETTE = [
-    "#3b4953",
-    "#4b615b",
-    "#5a7863",
-    "#759177",
-    "#90ab8b",
-    "#ebf4dd",
+    "#590d22",
+    "#a4133c",
+    "#c9184a",
+    "#ff4d6d",
+    "#ff758f",
+    "#ffb3c1",
   ];
 
   /** Muller : palette [Color Hunt](https://colorhunt.co/palette/281c594e8d9c85c79aedf7bd) (fort → doux). */
   const MULLER_PALETTE = [
-    "#281c59",
-    "#4e8d9c",
-    "#85c79a",
-    "#edf7bd",
+    "#0466c8",
+    "#005f73",
+    "#0a9396",
+    "#94d2bd",
   ];
 
   /** Pottier : palette [Color Hunt](https://colorhunt.co/palette/ffedceffc193ff8383ff3737) (fort → doux, comme Ronget/Muller). */
   const POTTIER_PALETTE = [
-    "#ff3737",
-    "#ff8383",
-    "#ffc193",
-    "#ffedce",
+    "#1b4332",
+    "#40916c",
+    "#74c69d",
+    "#b7e4c7",
   ];
 
   /**
