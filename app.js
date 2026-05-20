@@ -481,13 +481,12 @@
    */
   function setMemberPickContrastVars(btn, pickHex) {
     const L = relativeLuminanceFromHex(pickHex);
+    btn.style.removeProperty("--pick-name-fg");
     if (L == null || L <= 0.62) {
       btn.style.removeProperty("--pick-face-fg");
-      btn.style.removeProperty("--pick-name-fg");
       return;
     }
     btn.style.setProperty("--pick-face-fg", "#1f1a18");
-    btn.style.setProperty("--pick-name-fg", "#4a2c2a");
   }
 
   /**
@@ -555,7 +554,6 @@
     const idx = rawIdx >= 0 ? rawIdx : 0;
 
     if (familyId === "fam-hetreau-ronget") {
-      if (memberId === "hro-helene") return "#B5E18B";
       return paletteMemberHex(RONGET_PALETTE, idx, n);
     }
     if (familyId === "fam-hetreau-muller") {
