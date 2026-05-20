@@ -252,7 +252,7 @@
     if (existing) return existing;
     const inviteFamily = {
       id: CUSTOM_INVITE_FAMILY_ID,
-      name: "Invité",
+      name: "Invités",
       members: [],
     };
     families.push(inviteFamily);
@@ -521,9 +521,10 @@
 
   /** Accueil familles : SVG Illustrator (fonds noirs → masque CSS + couleur famille). */
   const FAMILY_GATE_ASSET_SVG = {
-    "fam-hetreau-ronget": "icons/Asset 1familles.svg",
-    "fam-hetreau-muller": "icons/Asset 2familles.svg",
-    "fam-hetreau-pottier": "icons/Asset 3familles.svg",
+    "fam-hetreau-ronget": "icons/Ronget.svg",
+    "fam-hetreau-muller": "icons/Muller.svg",
+    "fam-hetreau-pottier": "icons/Pottier.svg",
+    [CUSTOM_INVITE_FAMILY_ID]: "icons/Invite.svg",
   };
 
   /** Accueil invité : picto champignon inline. */
@@ -1491,18 +1492,18 @@
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "family-picker__btn";
-      const color = familyFullIconColor(fam.id);
-      btn.style.setProperty("--family-color", color);
-      const maskUrl = familyGateAssetMaskUrl(fam.id);
-      if (maskUrl) {
-        btn.style.setProperty("--family-mask", `url("${maskUrl}")`);
-      }
 
       const icon = document.createElement("span");
       icon.className = "family-picker__icon";
       icon.setAttribute("aria-hidden", "true");
-      if (fam.id === CUSTOM_INVITE_FAMILY_ID) {
-        icon.appendChild(makeInvitePineconeImgEl("family-picker__icon-img"));
+      const gateSvgUrl = familyGateAssetUrl(fam.id);
+      if (gateSvgUrl) {
+        const img = document.createElement("img");
+        img.className = "family-picker__icon-img";
+        img.src = gateSvgUrl;
+        img.alt = "";
+        img.loading = "lazy";
+        icon.appendChild(img);
       }
 
       const name = document.createElement("span");
@@ -1952,14 +1953,7 @@
     });
   }
 
-  function familyFullIconColor(familyId) {
-    if (familyId === "fam-hetreau-ronget") return "#ef476f";
-    if (familyId === "fam-hetreau-muller") return "#118ab2";
-    if (familyId === "fam-hetreau-pottier") return "#06d6a0";
-    return "hsl(175, 65%, 32%)";
-  }
-
-  function familyGateAssetMaskUrl(familyId) {
+  function familyGateAssetUrl(familyId) {
     const rel = FAMILY_GATE_ASSET_SVG[familyId];
     if (!rel) return "";
     const i = rel.lastIndexOf("/");

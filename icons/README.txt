@@ -4,9 +4,10 @@ Pictogrammes champignon (Villecroze)
 Référence de style : collection « Mushrooms » par Alex Muravev sur The Noun
 Project — https://thenounproject.com/browse/collection-icon/mushrooms-153448/
 
-Écran d’accueil « familles » : fichiers icons/Asset 1familles.svg … 3familles.svg
-(mappés dans app.js → FAMILY_GATE_ASSET_SVG), masque CSS sur .family-picker__icon
-(--family-mask + --family-color). Invité : picto inline FAMILY_GATE_MUSHROOM_INNER.guest.
+Écran d’accueil « familles » : icons/Ronget.svg, Muller.svg, Pottier.svg, Invite.svg
+(mappés dans app.js → FAMILY_GATE_ASSET_SVG par id de famille), affichés tels quels
+via <img> dans .family-picker__icon, nom en dessous. Bouton « Accès invité » :
+FAMILY_GATE_MUSHROOM_INNER.guest (picto inline).
 
 Le calendrier utilise des pastilles de couleur par réservation, pas ces pictos
 Asset.
