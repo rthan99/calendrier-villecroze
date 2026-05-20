@@ -469,6 +469,14 @@
     "#f2ad22",
   ];
 
+  /** Pictos invités : un SVG tiré au sort (stable par memberId) dans icons/Icons Famille/Invites/. */
+  const INVITE_MEMBER_ICON_SVGS = [
+    "icons/Icons Famille/Invites/Asset 19Invite.svg",
+    "icons/Icons Famille/Invites/Asset 20Invite.svg",
+    "icons/Icons Famille/Invites/Asset 21Invite.svg",
+    "icons/Icons Famille/Invites/Asset 23Invite.svg",
+  ];
+
   /**
    * @param {string[]} palette
    * @param {number} idx
@@ -505,20 +513,6 @@
 
   function carlaMushroomSvgUrl() {
     return assetUrl("icons/noun-mushrooms-4644483.svg");
-  }
-
-  function invitePineconePngUrl() {
-    return assetUrl("icons/noun-pinecone-8023365.png");
-  }
-
-  function makeInvitePineconeImgEl(cls) {
-    const img = document.createElement("img");
-    img.className = cls;
-    img.src = invitePineconePngUrl();
-    img.alt = "";
-    img.setAttribute("aria-hidden", "true");
-    img.loading = "lazy";
-    return img;
   }
 
   function memberHue(familyId, memberId) {
@@ -1863,23 +1857,13 @@
       btn.style.setProperty("--pick", memberNameColor(fam.id, m.id));
 
       const icon = document.createElement("span");
-      icon.className = "member-picker__icon";
       icon.setAttribute("aria-hidden", "true");
-      if (inviteMode) {
-        icon.appendChild(makeInvitePineconeImgEl("member-picker__icon-img"));
-      } else {
-        const iconUrl = memberIconAssetUrl(m.name);
-        if (iconUrl) {
-          const img = document.createElement("img");
-          img.className = "member-picker__icon-img";
-          img.src = iconUrl;
-          img.alt = "";
-          img.loading = "lazy";
-          icon.appendChild(img);
-        } else {
-          icon.textContent = m.initials;
-        }
-      }
+      fillMemberPickerIcon(
+        icon,
+        fam,
+        m,
+        memberNameColor(fam.id, m.id)
+      );
 
       const nameSp = document.createElement("span");
       nameSp.className = "member-picker__name";
@@ -1959,6 +1943,51 @@
     return assetUrl(
       "icons/Icons Famille/" + encodeURIComponent(stem + ".svg")
     );
+  }
+
+  function inviteMemberIconAssetUrl(memberId) {
+    if (!INVITE_MEMBER_ICON_SVGS.length) return "";
+    const idx = hashLayoutSeed(String(memberId || "")) % INVITE_MEMBER_ICON_SVGS.length;
+    const rel = INVITE_MEMBER_ICON_SVGS[idx];
+    const i = rel.lastIndexOf("/");
+    const dir = i >= 0 ? rel.slice(0, i + 1) : "";
+    const file = i >= 0 ? rel.slice(i + 1) : rel;
+    return assetUrl(dir + encodeURIComponent(file));
+  }
+
+  /**
+   * @param {HTMLElement} iconEl
+   * @param {{ id: string; name?: string; initials?: string }} fam
+   * @param {{ id: string; name?: string; initials?: string }} member
+   * @param {string} pickColor
+   */
+  function fillMemberPickerIcon(iconEl, fam, member, pickColor) {
+    iconEl.replaceChildren();
+    if (fam.id === CUSTOM_INVITE_FAMILY_ID) {
+      const maskUrl = inviteMemberIconAssetUrl(member.id);
+      if (maskUrl) {
+        iconEl.className = "member-picker__icon member-picker__icon--mask";
+        iconEl.style.backgroundColor = pickColor;
+        iconEl.style.setProperty("-webkit-mask-image", `url("${maskUrl}")`);
+        iconEl.style.setProperty("mask-image", `url("${maskUrl}")`);
+        return;
+      }
+    }
+    iconEl.className = "member-picker__icon";
+    iconEl.style.removeProperty("background-color");
+    iconEl.style.removeProperty("-webkit-mask-image");
+    iconEl.style.removeProperty("mask-image");
+    const iconUrl = memberIconAssetUrl(member.name);
+    if (iconUrl) {
+      const img = document.createElement("img");
+      img.className = "member-picker__icon-img";
+      img.src = iconUrl;
+      img.alt = "";
+      img.loading = "lazy";
+      iconEl.appendChild(img);
+      return;
+    }
+    iconEl.textContent = member.initials || "?";
   }
 
   /**

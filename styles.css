@@ -881,6 +881,19 @@ body {
   object-fit: contain;
 }
 
+.member-picker__icon--mask {
+  display: block;
+  width: min(100%, 5.25rem);
+  aspect-ratio: 62 / 67;
+  max-height: min(5.25rem, 18vmin);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
 .member-picker__name {
   flex-shrink: 0;
   max-width: 100%;

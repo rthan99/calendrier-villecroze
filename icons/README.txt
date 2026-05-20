@@ -13,7 +13,9 @@ Le calendrier utilise des pastilles de couleur par réservation, pas ces pictos
 Asset.
 
 Écran profils : icons/Icons Famille/{Prénom}.svg (ex. Helene.svg pour Hélène),
-affichés en éléments flottants (physique dans app.js), pas en grille.
+affichés en éléments flottants (physique dans app.js). Invités nommés :
+icons/Icons Famille/Invites/Asset *Invite.svg — un picto fixe par invité (tirage
+stable depuis memberId), teinté avec INVITE_PALETTE dans app.js.
 
 Fichier dédié Carla (calendrier / autre) : icons/noun-mushrooms-4644483.svg — champignon
 seul. Référence style : collection Mushrooms d’Alex Muravev sur The Noun Project.
