@@ -444,12 +444,12 @@
     "#ffb3c1",
   ];
 
-  /** Muller : palette [Color Hunt](https://colorhunt.co/palette/281c594e8d9c85c79aedf7bd) (fort → doux). */
+  /** Muller : aligné sur icons/Icons Famille/ (Gilles → Kim). */
   const MULLER_PALETTE = [
-    "#0466c8",
-    "#005f73",
-    "#0a9396",
+    "#2c67b2",
+    "#015f73",
     "#94d2bd",
+    "#079396",
   ];
 
   /** Pottier : palette [Color Hunt](https://colorhunt.co/palette/ffedceffc193ff8383ff3737) (fort → doux, comme Ronget/Muller). */
@@ -538,8 +538,6 @@
       return paletteMemberHex(RONGET_PALETTE, idx, n);
     }
     if (familyId === "fam-hetreau-muller") {
-      if (memberId === "hmu-carla") return "#2563eb";
-      if (memberId === "hmu-kim") return "#0ea5e9";
       return paletteMemberHex(MULLER_PALETTE, idx, n);
     }
     if (familyId === "fam-hetreau-pottier") {
