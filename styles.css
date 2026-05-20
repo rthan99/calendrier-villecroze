@@ -1432,7 +1432,7 @@ body {
 .day-person-dot {
   width: clamp(10px, 1.65vw, 14px);
   height: clamp(10px, 1.65vw, 14px);
-  border-radius: 50%;
+  border-radius: 2px;
   flex-shrink: 0;
   box-shadow: 0 0 0 1px rgba(29, 53, 87, 0.18) inset;
 }
