@@ -12,6 +12,8 @@ FAMILY_GATE_MUSHROOM_INNER.guest (picto inline).
 Le calendrier utilise des pastilles de couleur par réservation, pas ces pictos
 Asset.
 
-Fichier dédié Carla (Hetreau–Muller) : icons/noun-mushrooms-4644483.svg — champignon
-seul (texte d’attribution retiré). Référence style : collection Mushrooms d’Alex
-Muravev sur The Noun Project ; respectez la licence si vous remplacez le fichier.
+Écran profils : icons/Icons Famille/{Prénom}.svg (ex. Helene.svg pour Hélène),
+affichés en éléments flottants (physique dans app.js), pas en grille.
+
+Fichier dédié Carla (calendrier / autre) : icons/noun-mushrooms-4644483.svg — champignon
+seul. Référence style : collection Mushrooms d’Alex Muravev sur The Noun Project.

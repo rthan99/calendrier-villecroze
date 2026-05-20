@@ -470,35 +470,6 @@
   ];
 
   /**
-   * @param {string} hex #rrggbb
-   * @returns {number | null}
-   */
-  function relativeLuminanceFromHex(hex) {
-    const m = /^#?([0-9a-f]{6})$/i.exec(String(hex).trim());
-    if (!m) return null;
-    const n = parseInt(m[1], 16);
-    const ch = [n >> 16, (n >> 8) & 255, n & 255].map((v) => {
-      const c = v / 255;
-      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-    });
-    return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2];
-  }
-
-  /**
-   * @param {HTMLElement} btn
-   * @param {string} pickHex
-   */
-  function setMemberPickContrastVars(btn, pickHex) {
-    const L = relativeLuminanceFromHex(pickHex);
-    btn.style.removeProperty("--pick-name-fg");
-    if (L == null || L <= 0.62) {
-      btn.style.removeProperty("--pick-face-fg");
-      return;
-    }
-    btn.style.setProperty("--pick-face-fg", "#1f1a18");
-  }
-
-  /**
    * @param {string[]} palette
    * @param {number} idx
    * @param {number} n
@@ -1635,7 +1606,7 @@
   }
 
   /**
-   * Bulles en mouvement : inertie, rebonds murs & entre elles, répulsion souris.
+   * Profils : éléments libres (inertie, rebonds, répulsion souris).
    * @param {HTMLElement} grid
    */
   function startMemberPhysics(grid) {
@@ -1669,30 +1640,38 @@
       };
     })();
 
-    const r = Math.max(28, btns[0].offsetWidth / 2 || 56);
+    const sample = btns[0];
+    const r = Math.max(
+      40,
+      Math.max(sample.offsetWidth, sample.offsetHeight) / 2 || 56
+    );
     const minSep = r * 2.05;
     /** @type {{ el: HTMLElement; x: number; y: number; vx: number; vy: number; r: number }[]} */
     const bubbles = [];
 
     for (let i = 0; i < btns.length; i++) {
+      const btnR = Math.max(
+        40,
+        Math.max(btns[i].offsetWidth, btns[i].offsetHeight) / 2 || r
+      );
       let x = 0;
       let y = 0;
       let ok = false;
       for (let t = 0; t < 80 && !ok; t++) {
-        x = r + rnd() * (W - 2 * r);
-        y = r + rnd() * (H - 2 * r);
+        x = btnR + rnd() * (W - 2 * btnR);
+        y = btnR + rnd() * (H - 2 * btnR);
         ok = bubbles.every(
           (b) => Math.hypot(b.x - x, b.y - y) >= minSep * (0.85 + rnd() * 0.15)
         );
       }
       if (!ok) {
         const ang = (i / btns.length) * Math.PI * 2;
-        x = W / 2 + Math.cos(ang) * (W * 0.28) - r * 0.2;
+        x = W / 2 + Math.cos(ang) * (W * 0.28);
         y = H / 2 + Math.sin(ang) * (H * 0.28);
       }
       const vx = (rnd() - 0.5) * 95;
       const vy = (rnd() - 0.5) * 95;
-      bubbles.push({ el: btns[i], x, y, vx, vy, r });
+      bubbles.push({ el: btns[i], x, y, vx, vy, r: btnR });
       btns[i].style.left = `${x}px`;
       btns[i].style.top = `${y}px`;
     }
@@ -1883,27 +1862,32 @@
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "member-picker__btn";
-      const pick = memberNameColor(fam.id, m.id);
-      btn.style.setProperty("--pick", pick);
-      setMemberPickContrastVars(btn, pick);
+      btn.style.setProperty("--pick", memberNameColor(fam.id, m.id));
 
-      const face = document.createElement("span");
-      face.className = "member-picker__face";
-      if (fam.id === CUSTOM_INVITE_FAMILY_ID) {
-        face.appendChild(makeInvitePineconeImgEl("member-picker__face-img"));
-      } else if (m.id === "hmu-carla") {
-        face.appendChild(
-          makeCarlaMushroomIconEl(null, "member-picker__mask")
-        );
+      const icon = document.createElement("span");
+      icon.className = "member-picker__icon";
+      icon.setAttribute("aria-hidden", "true");
+      if (inviteMode) {
+        icon.appendChild(makeInvitePineconeImgEl("member-picker__icon-img"));
       } else {
-        face.textContent = m.initials;
+        const iconUrl = memberIconAssetUrl(m.name);
+        if (iconUrl) {
+          const img = document.createElement("img");
+          img.className = "member-picker__icon-img";
+          img.src = iconUrl;
+          img.alt = "";
+          img.loading = "lazy";
+          icon.appendChild(img);
+        } else {
+          icon.textContent = m.initials;
+        }
       }
 
       const nameSp = document.createElement("span");
       nameSp.className = "member-picker__name";
       nameSp.textContent = m.name;
 
-      btn.append(face, nameSp);
+      btn.append(icon, nameSp);
       btn.dataset.memberId = m.id;
       if (profileMemberIds.includes(m.id)) {
         btn.classList.add("member-picker__btn--selected");
@@ -1946,7 +1930,6 @@
     });
     els.profileGrid.dataset.floatFamily = fam.id;
     syncProfileContinue();
-    if (inviteMode) return;
     requestAnimationFrame(() => {
       startMemberPhysics(els.profileGrid);
       requestAnimationFrame(() => startMemberPhysics(els.profileGrid));
@@ -1960,6 +1943,24 @@
     const dir = i >= 0 ? rel.slice(0, i + 1) : "";
     const file = i >= 0 ? rel.slice(i + 1) : rel;
     return assetUrl(dir + encodeURIComponent(file));
+  }
+
+  /** Nom affiché → fichier dans icons/Icons Famille/ (ex. Hélène → Helene.svg). */
+  function memberIconFileStem(displayName) {
+    const raw = String(displayName || "")
+      .trim()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+    if (!raw) return "";
+    return raw.charAt(0).toUpperCase() + raw.slice(1);
+  }
+
+  function memberIconAssetUrl(displayName) {
+    const stem = memberIconFileStem(displayName);
+    if (!stem) return "";
+    return assetUrl(
+      "icons/Icons Famille/" + encodeURIComponent(stem + ".svg")
+    );
   }
 
   /**
