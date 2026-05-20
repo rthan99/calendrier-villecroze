@@ -1,39 +1,47 @@
-/* Palette: punch-red, honeydew, frosted-blue, cerulean, oxford-navy */
+/* Palette: punch-red, honeydew, frosted-blue, cerulean, oxford-navy — thème sombre */
 :root {
-  --punch-red: #e63946;
+  color-scheme: dark;
+
+  --punch-red: #f07178;
   --honeydew: #f1faee;
   --frosted-blue: #a8dadc;
-  --cerulean: #457b9d;
+  --cerulean: #6baed6;
   --oxford-navy: #1d3557;
 
   /* Aliases (used across existing rules) */
-  --pal-sage: var(--frosted-blue);
+  --pal-sage: #6eb8d4;
   --pal-cream: var(--honeydew);
   --pal-gold: var(--cerulean);
-  --pal-ink: var(--oxford-navy);
-  --pal-charcoal: var(--oxford-navy);
+  --pal-ink: #e8f1fa;
+  --pal-charcoal: #b8c9dc;
 
-  --bg: var(--honeydew);
-  --bg-deep: #dceeea;
-  --surface: #ffffff;
-  --surface-muted: #e3f4f5;
-  --border: rgba(29, 53, 87, 0.14);
-  --border-strong: rgba(29, 53, 87, 0.26);
-  --text: var(--oxford-navy);
-  --muted: #4d6a89;
+  --bg: #0f1a2e;
+  --bg-deep: #0a1220;
+  --surface: #1a2a42;
+  --surface-muted: #243552;
+  --surface-elevated: rgba(30, 48, 74, 0.96);
+  --border: rgba(241, 250, 238, 0.1);
+  --border-strong: rgba(241, 250, 238, 0.2);
+  --text: var(--honeydew);
+  --muted: #9eb4cc;
   --primary: var(--cerulean);
-  --primary-hover: #3a6a8a;
-  --primary-soft: var(--frosted-blue);
-  --primary-faint: rgba(168, 218, 220, 0.55);
+  --primary-hover: #8ec4e8;
+  --primary-soft: #355a75;
+  --primary-faint: rgba(107, 174, 214, 0.22);
   --accent: var(--punch-red);
-  --accent-soft: rgba(230, 57, 70, 0.35);
-  --gold: var(--cerulean);
-  --hero-ring: rgba(29, 53, 87, 0.28);
-  --hero-fill: #d4edf0;
-  --dim-month: #5a7394;
-  --shadow-sm: 0 1px 2px rgba(29, 53, 87, 0.08);
-  --shadow-md: 0 12px 40px rgba(29, 53, 87, 0.1);
-  --shadow-gate: 0 24px 60px rgba(29, 53, 87, 0.12);
+  --accent-soft: rgba(240, 113, 120, 0.38);
+  --gold: #8ec4e8;
+  --hero-ring: rgba(168, 218, 220, 0.28);
+  --hero-fill: #1e3350;
+  --dim-month: #6b8499;
+  --badge-bg: #2a4060;
+  --badge-fg: var(--honeydew);
+  --inset-line: rgba(0, 0, 0, 0.35);
+  --overlay-light: rgba(241, 250, 238, 0.08);
+  --overlay-light-strong: rgba(241, 250, 238, 0.14);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 12px 40px rgba(0, 0, 0, 0.45);
+  --shadow-gate: 0 24px 60px rgba(0, 0, 0, 0.5);
   --radius: 16px;
   --radius-sm: 12px;
   --radius-tile: 14px;
@@ -58,9 +66,9 @@ body {
   background: var(--bg);
   background-image: radial-gradient(
     120% 100% at 50% 0%,
-    #ffffff 0%,
-    var(--bg) 45%,
-    var(--frosted-blue) 100%
+    #1a2f4a 0%,
+    var(--bg) 50%,
+    var(--bg-deep) 100%
   );
   color: var(--text);
   overflow: hidden;
@@ -75,7 +83,7 @@ body {
   height: 2rem;
   border: 1px solid var(--border-strong);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--surface-elevated);
   color: var(--text);
   font: inherit;
   font-size: 1.2rem;
@@ -90,7 +98,7 @@ body {
 
 .global-back-btn:hover {
   border-color: var(--primary);
-  background: #fff;
+  background: var(--surface-muted);
 }
 
 .global-back-btn[hidden] {
@@ -820,7 +828,7 @@ body {
   height: 1.25rem;
   border: 1px solid var(--border-strong);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--surface-elevated);
   color: var(--text);
   display: inline-flex;
   align-items: center;
@@ -834,7 +842,7 @@ body {
 }
 
 .member-picker__remove:hover {
-  background: #fff;
+  background: var(--surface-muted);
   border-color: var(--accent);
   color: var(--accent);
 }
@@ -1045,7 +1053,7 @@ body {
 .tile.tile--selected {
   border-color: var(--primary);
   background: var(--primary-faint);
-  box-shadow: 0 0 0 1px rgba(29, 53, 87, 0.22);
+  box-shadow: 0 0 0 1px var(--overlay-light-strong);
 }
 
 .tile.tile--selected:hover {
@@ -1238,15 +1246,15 @@ body {
     var(--pal-sage) 100%
   );
   box-shadow:
-    0 0 0 1px rgba(29, 53, 87, 0.08) inset,
-    0 10px 28px rgba(29, 53, 87, 0.08);
+    0 0 0 1px var(--overlay-light) inset,
+    0 10px 28px rgba(0, 0, 0, 0.35);
   z-index: 1;
 }
 
 .month--faint {
   opacity: 0.42;
   filter: grayscale(0.35) saturate(0.65);
-  border-color: rgba(0, 0, 0, 0.04);
+  border-color: var(--border);
   box-shadow: none;
   z-index: 0;
 }
@@ -1303,7 +1311,7 @@ body {
   justify-content: space-between;
   gap: 0.35rem;
   flex-shrink: 0;
-  background: rgba(251, 251, 248, 0.72);
+  background: var(--surface-muted);
 }
 
 .month-title {
@@ -1413,7 +1421,7 @@ body {
   height: clamp(10px, 1.65vw, 14px);
   border-radius: 2px;
   flex-shrink: 0;
-  box-shadow: 0 0 0 1px rgba(29, 53, 87, 0.18) inset;
+  box-shadow: 0 0 0 1px var(--inset-line) inset;
 }
 
 .day-person-dot--maybe {
@@ -1428,7 +1436,7 @@ body {
   top: 50%;
   width: 170%;
   height: 2px;
-  background: #121212;
+  background: var(--text);
   transform: translate(-50%, -50%) rotate(-42deg);
   pointer-events: none;
   border-radius: 0.5px;
@@ -1456,8 +1464,8 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--oxford-navy);
-  color: var(--honeydew);
+  background: var(--badge-bg);
+  color: var(--badge-fg);
   font-size: clamp(0.58rem, 1.15vw, 0.74rem);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
@@ -1501,7 +1509,7 @@ body {
 .day--mine {
   background: var(--primary-soft);
   color: var(--primary-hover);
-  box-shadow: 0 0 0 1px rgba(29, 53, 87, 0.35) inset;
+  box-shadow: 0 0 0 1px var(--overlay-light-strong) inset;
 }
 
 .day--in-month.day--mine.day--has-people {
@@ -1512,13 +1520,13 @@ body {
 }
 
 .day--other {
-  background: rgba(29, 53, 87, 0.12);
+  background: var(--overlay-light);
   color: var(--text);
 }
 
 .day--in-month.day--other.day--has-people {
   background: var(--surface);
-  border-bottom: 2px solid rgba(29, 53, 87, 0.42);
+  border-bottom: 2px solid var(--overlay-light-strong);
 }
 
 .day--mixed {
@@ -1529,8 +1537,8 @@ body {
   );
   color: var(--text);
   box-shadow:
-    0 0 0 1px rgba(29, 53, 87, 0.22) inset,
-    0 0 0 1px rgba(69, 123, 157, 0.55) inset;
+    0 0 0 1px var(--overlay-light-strong) inset,
+    0 0 0 1px rgba(107, 174, 214, 0.45) inset;
 }
 
 .day--in-month.day--mixed.day--has-people {
@@ -1568,20 +1576,20 @@ body {
 }
 
 .day--guest-locked {
-  background: rgba(29, 53, 87, 0.2) !important;
+  background: var(--overlay-light-strong) !important;
   color: var(--text);
   cursor: default;
-  box-shadow: 0 0 0 1.5px rgba(69, 123, 157, 0.75) inset;
+  box-shadow: 0 0 0 1.5px rgba(107, 174, 214, 0.55) inset;
 }
 
 .day--guest-locked.day--in-month:hover {
-  background: rgba(29, 53, 87, 0.28) !important;
+  background: rgba(107, 174, 214, 0.18) !important;
 }
 
 .day--guest-locked.day--today {
   box-shadow:
     0 0 0 1.5px var(--gold) inset,
-    0 0 0 3px rgba(29, 53, 87, 0.22) inset;
+    0 0 0 3px var(--overlay-light-strong) inset;
 }
 
 .day-hover-tip {
@@ -1592,7 +1600,7 @@ body {
   background: var(--surface);
   border: 1px solid var(--border-strong);
   border-radius: 12px;
-  box-shadow: 0 16px 48px rgba(29, 53, 87, 0.16);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55);
   font-size: 0.8rem;
   line-height: 1.45;
   pointer-events: none;
