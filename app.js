@@ -460,6 +460,15 @@
     "#b7e4c7",
   ];
 
+  /** Invités (fam-invite-custom) : bright gold → sunflower gold. */
+  const INVITE_PALETTE = [
+    "#ffda1f",
+    "#fece22",
+    "#fdc224",
+    "#ffb726",
+    "#f2ad22",
+  ];
+
   /**
    * @param {string} hex #rrggbb
    * @returns {number | null}
@@ -563,6 +572,9 @@
     }
     if (familyId === "fam-hetreau-pottier") {
       return paletteMemberHex(POTTIER_PALETTE, idx, n);
+    }
+    if (familyId === CUSTOM_INVITE_FAMILY_ID) {
+      return paletteMemberHex(INVITE_PALETTE, idx, n);
     }
 
     const h = memberHue(familyId, memberId);
