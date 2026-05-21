@@ -483,6 +483,16 @@ body {
   gap: clamp(0.2rem, 0.8vw, 0.45rem);
 }
 
+/* Texte sur fond sombre (hors cartes / mois) */
+.panel-calendar .panel-title {
+  color: var(--honeydew);
+}
+
+.panel-calendar .panel-lead,
+.panel-calendar .hint {
+  color: var(--frosted-blue);
+}
+
 .panel[hidden] {
   display: none !important;
 }
