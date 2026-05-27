@@ -1428,7 +1428,7 @@ body {
 }
 
 .day-person-dot--maybe {
-  background: transparent;
+  background: color-mix(in srgb, var(--dot-color, var(--muted)) 20%, transparent);
   border: 2px solid var(--dot-color, var(--muted));
   box-shadow: none;
 }
