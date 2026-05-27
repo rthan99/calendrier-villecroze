@@ -588,6 +588,8 @@
     sessionName: document.getElementById("sessionName"),
     switchProfileBtn: document.getElementById("switchProfileBtn"),
     calContext: document.getElementById("calContext"),
+    calInfoBtn: document.getElementById("calInfoBtn"),
+    calInfoPanel: document.getElementById("calInfoPanel"),
     bookerBar: document.getElementById("bookerBar"),
     bookerChips: document.getElementById("bookerChips"),
     guestGlobalMinus: document.getElementById("guestGlobalMinus"),
@@ -1327,11 +1329,24 @@
     syncMobileCalendarView();
   }
 
+  function closeCalInfoPanel() {
+    els.calInfoPanel?.classList.remove("cal-info-panel--open");
+    els.calInfoBtn?.setAttribute("aria-expanded", "false");
+    els.calInfoBtn?.classList.remove("cal-info-btn--active");
+  }
+
+  function syncCalInfoPanel() {
+    if (!isMobileCalendarLayout() || currentStep !== "calendar") {
+      closeCalInfoPanel();
+    }
+  }
+
   function syncMobileCalendarView() {
     const mobile = isMobileCalendarLayout();
     const onCal = currentStep === "calendar";
     document.body.classList.toggle("body--mobile-cal", mobile && onCal);
     if (els.app) els.app.classList.toggle("app--mobile-cal", mobile && onCal);
+    syncCalInfoPanel();
     if (els.monthsMobileNav) els.monthsMobileNav.hidden = !mobile || !onCal;
     if (!mobile || !onCal) {
       els.monthsRoot
@@ -2399,6 +2414,7 @@
       els.monthsRoot.appendChild(wrap);
     });
     syncMobileCalendarView();
+    closeCalInfoPanel();
   }
 
   function onDayClick(key) {
@@ -2542,14 +2558,37 @@
   els.monthsMobilePrev?.addEventListener("click", () => shiftMobileMonth(-1));
   els.monthsMobileNext?.addEventListener("click", () => shiftMobileMonth(1));
 
+  els.calInfoBtn?.addEventListener("click", (ev) => {
+    ev.stopPropagation();
+    const open = els.calInfoPanel?.classList.toggle("cal-info-panel--open");
+    els.calInfoBtn.setAttribute("aria-expanded", open ? "true" : "false");
+    els.calInfoBtn.classList.toggle("cal-info-btn--active", !!open);
+    els.calInfoBtn.setAttribute(
+      "aria-label",
+      open ? "Masquer les informations" : "Afficher les informations"
+    );
+  });
+
   els.dayHoverBackdrop?.addEventListener("click", () => hideDayHoverTip());
 
   document.addEventListener(
     "click",
     (ev) => {
-      if (els.dayHoverTip?.hidden || !isCoarsePointer()) return;
       const t = ev.target;
       if (!(t instanceof Element)) return;
+      if (
+        isMobileCalendarLayout() &&
+        els.calInfoPanel?.classList.contains("cal-info-panel--open") &&
+        !t.closest(".cal-info-btn") &&
+        !t.closest(".cal-info-panel")
+      ) {
+        closeCalInfoPanel();
+        els.calInfoBtn?.setAttribute(
+          "aria-label",
+          "Afficher les informations"
+        );
+      }
+      if (els.dayHoverTip?.hidden || !isCoarsePointer()) return;
       if (t.closest(".day-hover-tip") || t.closest(".day-hover-backdrop")) return;
       if (t.closest(".day--in-month, .day--guest-locked")) return;
       hideDayHoverTip();
