@@ -2033,21 +2033,78 @@
   }
 
   /**
-   * Pastilles pleines par réservation (membre). Rien en vue invité (anonymat).
+   * @param {DayEntry[]} entries
+   * @returns {{ confirmed: number; maybe: number }}
+   */
+  function countDayPresence(entries) {
+    let confirmed = 0;
+    let maybe = 0;
+    for (const e of entries) {
+      const n = 1 + (e.guests ?? 0);
+      if (e.status === "maybe") maybe += n;
+      else confirmed += n;
+    }
+    return { confirmed, maybe };
+  }
+
+  /**
+   * Pastilles par réservation : pleine (confirmé) ou creuse (peut-être).
    * @param {HTMLElement} container
    * @param {DayEntry[]} entries
    */
   function fillDayPeopleRow(container, entries) {
     container.replaceChildren();
     for (const e of entries) {
+      const color = memberNameColor(e.familyId, e.memberId);
       const dot = document.createElement("span");
+      const isMaybe = e.status === "maybe";
       dot.className =
-        "day-person-dot" +
-        (e.status === "maybe" ? " day-person-dot--maybe" : "");
-      dot.style.backgroundColor = memberNameColor(e.familyId, e.memberId);
+        "day-person-dot" + (isMaybe ? " day-person-dot--maybe" : "");
+      dot.style.setProperty("--dot-color", color);
+      if (!isMaybe) dot.style.backgroundColor = color;
       dot.setAttribute("aria-hidden", "true");
       container.appendChild(dot);
     }
+  }
+
+  /**
+   * Pilule confirmé / peut-être en bas de cellule.
+   * @param {HTMLElement} parent
+   * @param {DayEntry[]} entries
+   * @param {{ guestMode?: boolean }} [opts]
+   */
+  function appendDayPeoplePill(parent, entries, opts = {}) {
+    let confirmed;
+    let maybe;
+    if (opts.guestMode) {
+      confirmed = entries.reduce((s, e) => s + 1 + (e.guests ?? 0), 0);
+      maybe = 0;
+    } else {
+      ({ confirmed, maybe } = countDayPresence(entries));
+    }
+    if (confirmed + maybe === 0) return;
+
+    const pill = document.createElement("span");
+    pill.className = "day-people-pill";
+    pill.setAttribute("aria-hidden", "true");
+
+    if (confirmed > 0) {
+      const seg = document.createElement("span");
+      seg.className = "day-people-pill__confirmed";
+      if (maybe > 0) seg.style.flexGrow = String(confirmed);
+      seg.textContent = String(confirmed);
+      pill.appendChild(seg);
+    }
+
+    if (maybe > 0) {
+      const seg = document.createElement("span");
+      seg.className = "day-people-pill__maybe";
+      if (confirmed > 0) seg.style.flexGrow = String(maybe);
+      seg.textContent = `${maybe}?`;
+      pill.appendChild(seg);
+    }
+
+    parent.appendChild(pill);
   }
 
   function escapeHtml(s) {
@@ -2180,19 +2237,12 @@
             numG.textContent = String(d);
             guestCell.appendChild(numG);
             if (locked) {
-              const headcountG = entries.reduce(
-                (s, e) => s + 1 + (e.guests ?? 0),
-                0
-              );
               guestCell.classList.add("day--has-people");
               const rowG = document.createElement("div");
               rowG.className = "day-people day-people--guest";
               rowG.setAttribute("aria-hidden", "true");
               guestCell.appendChild(rowG);
-              const totalG = document.createElement("span");
-              totalG.className = "day-people-total";
-              totalG.textContent = String(headcountG);
-              guestCell.appendChild(totalG);
+              appendDayPeoplePill(guestCell, entries, { guestMode: true });
             }
             row.appendChild(guestCell);
             continue;
@@ -2218,10 +2268,6 @@
           num.className = "day-num";
           num.textContent = String(d);
           cell.appendChild(num);
-          const headcount = entries.reduce(
-            (s, e) => s + 1 + (e.guests ?? 0),
-            0
-          );
           if (entries.length > 0) {
             cell.classList.add("day--has-people");
             const peopleRow = document.createElement("div");
@@ -2229,10 +2275,7 @@
             peopleRow.setAttribute("aria-hidden", "true");
             fillDayPeopleRow(peopleRow, entries);
             cell.appendChild(peopleRow);
-            const total = document.createElement("span");
-            total.className = "day-people-total";
-            total.textContent = String(headcount);
-            cell.appendChild(total);
+            appendDayPeoplePill(cell, entries);
           }
           if (!browseReadOnly) {
             cell.addEventListener("click", () => onDayClick(key));
