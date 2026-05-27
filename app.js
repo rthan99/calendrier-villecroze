@@ -244,6 +244,10 @@
     { month: 9, mode: "faint" },
   ];
 
+  const MOBILE_CALENDAR_MQ = window.matchMedia("(max-width: 768px)");
+  const MOBILE_MONTH_SEQUENCE = [5, 6, 7, 8, 9];
+  let mobileActiveMonth = 7;
+
   /** Données familles (éditer surtout content/families.json). */
   let families = [];
 
@@ -564,6 +568,7 @@
   }
 
   const els = {
+    app: document.getElementById("app"),
     globalBackBtn: document.getElementById("globalBackBtn"),
     stepFamily: document.getElementById("stepFamily"),
     stepProfile: document.getElementById("stepProfile"),
@@ -575,6 +580,10 @@
     selectWholeFamilyBtn: document.getElementById("selectWholeFamilyBtn"),
     backToFamilies: document.getElementById("backToFamilies"),
     monthsRoot: document.getElementById("monthsRoot"),
+    monthsMobileNav: document.getElementById("monthsMobileNav"),
+    monthsMobilePrev: document.getElementById("monthsMobilePrev"),
+    monthsMobileNext: document.getElementById("monthsMobileNext"),
+    monthsMobileLabel: document.getElementById("monthsMobileLabel"),
     sessionSlot: document.getElementById("sessionSlot"),
     sessionName: document.getElementById("sessionName"),
     switchProfileBtn: document.getElementById("switchProfileBtn"),
@@ -587,6 +596,7 @@
     profileInviteRow: document.getElementById("profileInviteRow"),
     profileFootnote: document.getElementById("profileFootnote"),
     profileStepLead: document.getElementById("profileStepLead"),
+    dayHoverBackdrop: document.getElementById("dayHoverBackdrop"),
     dayHoverTip: document.getElementById("dayHoverTip"),
     dayHoverTipTitle: document.getElementById("dayHoverTipTitle"),
     dayHoverTipBody: document.getElementById("dayHoverTipBody"),
@@ -1286,9 +1296,63 @@
     return `${pfx}${list}`.slice(0, 420);
   }
 
+  function isCoarsePointer() {
+    return window.matchMedia("(hover: none)").matches;
+  }
+
+  function isMobileCalendarLayout() {
+    return MOBILE_CALENDAR_MQ.matches;
+  }
+
+  function monthDisplayTitle(month) {
+    const lab =
+      siteText?.calendar?.monthLabels[String(month)] ??
+      siteText?.calendar?.monthLabels[month] ??
+      String(month);
+    const cap = lab.charAt(0).toUpperCase() + lab.slice(1);
+    return `${cap} ${YEAR}`;
+  }
+
+  function shiftMobileMonth(delta) {
+    const i = MOBILE_MONTH_SEQUENCE.indexOf(mobileActiveMonth);
+    if (i < 0) {
+      mobileActiveMonth = MOBILE_MONTH_SEQUENCE[0];
+    } else {
+      mobileActiveMonth =
+        MOBILE_MONTH_SEQUENCE[
+          (i + delta + MOBILE_MONTH_SEQUENCE.length) %
+            MOBILE_MONTH_SEQUENCE.length
+        ];
+    }
+    syncMobileCalendarView();
+  }
+
+  function syncMobileCalendarView() {
+    const mobile = isMobileCalendarLayout();
+    const onCal = currentStep === "calendar";
+    document.body.classList.toggle("body--mobile-cal", mobile && onCal);
+    if (els.app) els.app.classList.toggle("app--mobile-cal", mobile && onCal);
+    if (els.monthsMobileNav) els.monthsMobileNav.hidden = !mobile || !onCal;
+    if (!mobile || !onCal) {
+      els.monthsRoot
+        ?.querySelectorAll(".month")
+        .forEach((m) => m.classList.remove("is-mobile-active"));
+      return;
+    }
+    if (els.monthsMobileLabel) {
+      els.monthsMobileLabel.textContent = monthDisplayTitle(mobileActiveMonth);
+    }
+    els.monthsRoot?.querySelectorAll(".month").forEach((m) => {
+      const n = Number(m.dataset.month);
+      m.classList.toggle("is-mobile-active", n === mobileActiveMonth);
+    });
+  }
+
   function hideDayHoverTip() {
     if (!els.dayHoverTip || els.dayHoverTip.hidden) return;
     els.dayHoverTip.hidden = true;
+    els.dayHoverTip.classList.remove("day-hover-tip--sheet");
+    if (els.dayHoverBackdrop) els.dayHoverBackdrop.hidden = true;
     if (els.dayHoverTipBody) els.dayHoverTipBody.innerHTML = "";
     if (els.dayHoverTipFoot) els.dayHoverTipFoot.innerHTML = "";
   }
@@ -1307,10 +1371,23 @@
       if (t.footHtml) els.dayHoverTipFoot.innerHTML = t.footHtml;
       else els.dayHoverTipFoot.textContent = t.foot || "";
     }
+    const sheet = isCoarsePointer();
+    els.dayHoverTip.classList.toggle("day-hover-tip--sheet", sheet);
+    if (els.dayHoverBackdrop) els.dayHoverBackdrop.hidden = !sheet;
     els.dayHoverTip.hidden = false;
+    if (sheet) {
+      els.dayHoverTip.style.visibility = "visible";
+      els.dayHoverTip.style.left = "0";
+      els.dayHoverTip.style.top = "auto";
+      els.dayHoverTip.style.right = "0";
+      els.dayHoverTip.style.bottom = "0";
+      return;
+    }
     els.dayHoverTip.style.visibility = "hidden";
     els.dayHoverTip.style.left = "0px";
     els.dayHoverTip.style.top = "0px";
+    els.dayHoverTip.style.right = "";
+    els.dayHoverTip.style.bottom = "";
     requestAnimationFrame(() => {
       const r = anchor.getBoundingClientRect();
       const pad = 10;
@@ -1327,8 +1404,12 @@
     });
   }
 
-  /** @param {HTMLButtonElement} cell @param {DayEntry[]} entries */
-  function bindDayHover(cell, entries) {
+  /**
+   * @param {HTMLElement} cell
+   * @param {DayEntry[]} entries
+   * @param {{ tipOnTap?: boolean }} [opts]
+   */
+  function bindDayHover(cell, entries, opts = {}) {
     const entriesSnap = entries.map((e) => {
       const row = {
         familyId: e.familyId,
@@ -1340,10 +1421,38 @@
     });
     const show = () => showDayHoverTip(cell, entriesSnap);
     const hide = () => hideDayHoverTip();
-    cell.addEventListener("mouseenter", show);
-    cell.addEventListener("mouseleave", hide);
-    cell.addEventListener("focus", show);
-    cell.addEventListener("blur", hide);
+
+    if (!isCoarsePointer()) {
+      cell.addEventListener("mouseenter", show);
+      cell.addEventListener("mouseleave", hide);
+      cell.addEventListener("focus", show);
+      cell.addEventListener("blur", hide);
+      return;
+    }
+
+    if (opts.tipOnTap) {
+      cell.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        show();
+      });
+      return;
+    }
+
+    let pressTimer = 0;
+    cell.addEventListener(
+      "touchstart",
+      () => {
+        pressTimer = window.setTimeout(show, 450);
+      },
+      { passive: true }
+    );
+    const clearPress = () => {
+      if (pressTimer) window.clearTimeout(pressTimer);
+      pressTimer = 0;
+    };
+    cell.addEventListener("touchend", clearPress);
+    cell.addEventListener("touchcancel", clearPress);
+    cell.addEventListener("touchmove", clearPress);
   }
 
   function showStep(step) {
@@ -1393,6 +1502,7 @@
     } else {
       stopMemberPhysics();
     }
+    syncMobileCalendarView();
   }
 
   function syncProfileContinue() {
@@ -2230,7 +2340,7 @@
             if (key === todayKey) guestCell.classList.add("day--today");
             guestCell.title = dayNativeTitle(entries);
             guestCell.setAttribute("aria-label", dayAriaLabel(entries));
-            if (locked) bindDayHover(guestCell, entries);
+            if (locked) bindDayHover(guestCell, entries, { tipOnTap: true });
             guestCell.dataset.date = key;
             const numG = document.createElement("span");
             numG.className = "day-num";
@@ -2258,7 +2368,7 @@
           else if (kind === "mixed") cell.classList.add("day--mixed");
           cell.title = dayNativeTitle(entries);
           cell.setAttribute("aria-label", dayAriaLabel(entries));
-          bindDayHover(cell, entries);
+          bindDayHover(cell, entries, { tipOnTap: browseReadOnly });
           cell.dataset.date = key;
           if (browseReadOnly) {
             cell.setAttribute("aria-disabled", "true");
@@ -2288,6 +2398,7 @@
       wrap.appendChild(body);
       els.monthsRoot.appendChild(wrap);
     });
+    syncMobileCalendarView();
   }
 
   function onDayClick(key) {
@@ -2418,7 +2529,33 @@
   });
 
   window.addEventListener("scroll", () => hideDayHoverTip(), true);
-  window.addEventListener("resize", () => hideDayHoverTip());
+  window.addEventListener("resize", () => {
+    hideDayHoverTip();
+    syncMobileCalendarView();
+  });
+
+  MOBILE_CALENDAR_MQ.addEventListener("change", () => {
+    hideDayHoverTip();
+    syncMobileCalendarView();
+  });
+
+  els.monthsMobilePrev?.addEventListener("click", () => shiftMobileMonth(-1));
+  els.monthsMobileNext?.addEventListener("click", () => shiftMobileMonth(1));
+
+  els.dayHoverBackdrop?.addEventListener("click", () => hideDayHoverTip());
+
+  document.addEventListener(
+    "click",
+    (ev) => {
+      if (els.dayHoverTip?.hidden || !isCoarsePointer()) return;
+      const t = ev.target;
+      if (!(t instanceof Element)) return;
+      if (t.closest(".day-hover-tip") || t.closest(".day-hover-backdrop")) return;
+      if (t.closest(".day--in-month, .day--guest-locked")) return;
+      hideDayHoverTip();
+    },
+    true
+  );
 
   async function boot() {
     await loadSiteContent();

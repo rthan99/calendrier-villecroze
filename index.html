@@ -106,10 +106,35 @@
           <div class="booker-bar" id="bookerBar" hidden>
             <div class="booker-chips" id="bookerChips" role="radiogroup" aria-label="Profil actif"></div>
           </div>
+          <nav
+            class="months-mobile-nav"
+            id="monthsMobileNav"
+            hidden
+            aria-label="Navigation par mois"
+          >
+            <button
+              type="button"
+              class="months-mobile-nav__btn"
+              id="monthsMobilePrev"
+              aria-label="Mois précédent"
+            >
+              ‹
+            </button>
+            <p class="months-mobile-nav__label" id="monthsMobileLabel" aria-live="polite"></p>
+            <button
+              type="button"
+              class="months-mobile-nav__btn"
+              id="monthsMobileNext"
+              aria-label="Mois suivant"
+            >
+              ›
+            </button>
+          </nav>
           <div class="months" id="monthsRoot"></div>
         </section>
       </main>
     </div>
+    <div id="dayHoverBackdrop" class="day-hover-backdrop" hidden aria-hidden="true"></div>
     <div id="dayHoverTip" class="day-hover-tip" hidden role="tooltip">
       <div class="day-hover-tip-title" id="dayHoverTipTitle"></div>
       <div class="day-hover-tip-body" id="dayHoverTipBody"></div>

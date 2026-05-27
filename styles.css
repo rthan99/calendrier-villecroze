@@ -1683,7 +1683,8 @@ body {
   border: none;
 }
 
-@media (max-width: 900px) {
+/* Tablette : grille 2×2 + septembre */
+@media (max-width: 900px) and (min-width: 769px) {
   .months {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-rows: minmax(0, 1.15fr) minmax(0, 0.75fr) minmax(0, 0.32fr);
@@ -1710,19 +1711,246 @@ body {
   }
 }
 
-@media (max-width: 620px) {
+/* ——— Mobile : un mois à la fois, défilement, détail au toucher ——— */
+.months-mobile-nav {
+  display: none;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  margin-bottom: 0.15rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+.months-mobile-nav[hidden] {
+  display: none !important;
+}
+
+.months-mobile-nav__btn {
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--text);
+  font: inherit;
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.months-mobile-nav__btn:active {
+  background: var(--primary-faint);
+  border-color: var(--primary);
+}
+
+.months-mobile-nav__label {
+  margin: 0;
+  flex: 1;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+
+.day-hover-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: rgba(10, 18, 32, 0.55);
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.day-hover-backdrop:not([hidden]) {
+  display: block;
+}
+
+.day-hover-tip--sheet {
+  left: 0 !important;
+  right: 0 !important;
+  top: auto !important;
+  bottom: 0 !important;
+  width: auto !important;
+  max-width: none !important;
+  margin: 0;
+  border-radius: 16px 16px 0 0;
+  border-bottom: none;
+  box-shadow: 0 -8px 40px rgba(29, 53, 87, 0.22);
+  padding: 0.85rem 1rem max(0.85rem, env(safe-area-inset-bottom));
+  z-index: 10001;
+}
+
+@media (max-width: 768px) {
+  body.body--mobile-cal {
+    overflow: auto;
+    overflow-x: hidden;
+  }
+
+  body.body--mobile-cal .app {
+    height: auto;
+    min-height: 100dvh;
+    max-height: none;
+    overflow: visible;
+  }
+
+  body.body--mobile-cal .stage,
+  body.body--mobile-cal .panel-calendar {
+    flex: none;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  body.body--mobile-cal .app-hero {
+    padding: 0.2rem 0.35rem 0.25rem;
+  }
+
+  body.body--mobile-cal .app-hero-title {
+    font-size: 1.05rem;
+  }
+
+  body.body--mobile-cal .app-hero-tagline {
+    font-size: 0.88rem;
+  }
+
+  .months-mobile-nav:not([hidden]) {
+    display: flex;
+  }
+
+  .panel-calendar .months {
+    display: block;
+    flex: none;
+    min-height: auto;
+    overflow: visible;
+  }
+
+  .panel-calendar .months .month {
+    display: none;
+    min-height: min(72vw, 420px);
+    margin-bottom: 0;
+  }
+
+  .panel-calendar .months .month.is-mobile-active {
+    display: flex;
+  }
+
+  /* Même lisibilité pour tous les mois sur mobile */
+  .panel-calendar .month--peek,
+  .panel-calendar .month--faint {
+    opacity: 1;
+    filter: none;
+  }
+
+  .panel-calendar .month--faint .month-title,
+  .panel-calendar .month--peek .month-title {
+    color: var(--text);
+    font-size: clamp(0.85rem, 4vw, 1rem) !important;
+  }
+
+  .panel-calendar .month--hero .month-title,
+  .panel-calendar .month.is-mobile-active .month-title {
+    color: var(--primary);
+    font-size: clamp(0.92rem, 4.2vw, 1.05rem) !important;
+  }
+
+  .panel-calendar .month--faint .wd,
+  .panel-calendar .month--faint .day,
+  .panel-calendar .month--peek .wd,
+  .panel-calendar .month--peek .day {
+    font-size: clamp(0.62rem, 2.8vw, 0.78rem);
+  }
+
+  .panel-calendar .month.is-mobile-active .day--in-month {
+    font-size: clamp(0.72rem, 3.2vw, 0.88rem);
+    min-height: 2.1rem;
+  }
+
+  .panel-calendar .month.is-mobile-active .wd {
+    font-size: clamp(0.62rem, 2.8vw, 0.72rem);
+  }
+
+  .panel-calendar .day-person-dot {
+    width: clamp(11px, 3vw, 14px);
+    height: clamp(11px, 3vw, 14px);
+  }
+
+  .panel-calendar .day-people-pill {
+    width: 38px;
+    height: 17px;
+  }
+
   .session--calendar {
     flex-direction: column;
-    align-items: flex-end;
+    align-items: stretch;
+  }
+
+  .session-text {
+    justify-content: flex-start;
+  }
+
+  .session-name {
+    text-align: left;
+    justify-content: flex-start;
+  }
+
+  .btn-ghost#switchProfileBtn {
+    align-self: stretch;
+    width: 100%;
+    text-align: center;
+  }
+
+  .family-landing {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+  }
+
+  #stepFamily .gate-card {
+    width: 100%;
+    max-width: none;
+    max-height: none;
   }
 
   .gate-card {
-    --gate: min(92vmin, 520px, calc(100vw - 0.85rem), calc(100vh - 6.5rem));
+    --gate: min(94vw, 520px);
+    width: 100%;
+    max-width: calc(100vw - 1rem);
+    height: auto;
+    max-height: none;
   }
 
   .gate-card.gate-card--profiles {
-    min-height: min(68vmin, 560px);
-    --gate-w: min(96vmin, calc(100vw - 0.65rem));
+    min-height: min(70dvh, 640px);
+    --gate-w: calc(100vw - 0.85rem);
+    width: var(--gate-w);
+  }
+
+  .cal-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .panel-calendar .hint {
+    font-size: 0.72rem;
+    line-height: 1.4;
+  }
+}
+
+@media (max-width: 620px) {
+  .family-landing {
+    grid-template-columns: 1fr;
   }
 }
 
